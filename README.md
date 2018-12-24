@@ -51,3 +51,23 @@ Things can always go wrong in the world of programming. If this happens, clone t
 #### Problems with the Repo
 I want this repo to work perfectly for as many users as possible. Got a problem? <a href=https://github.com/danielstern/isomorphic-react/issues/new>Open an issue!</a> Let's figure out a solution together.
 
+
+# LEARN REACT TESTING
+
+**This is a step by step guide to test your react application**
+
+## Introduction
+
+## Understanding Testing
+
+## Introduction to Jest
+
+## Test Running with Jest
+
+## Mocking Functions and Modules
+
+## Snapshot Testing
+
+## Testing Components
+
+## Advanced Jest Matchers
