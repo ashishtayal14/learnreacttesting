@@ -357,14 +357,34 @@ A mock is a convincing duplicate without any internal workings. They can be crea
 
 **Creating mock files** :
 
-1. Appropriately names npm mocks are loaded automatically.
+1. Appropriately named npm mocks are loaded automatically.
 2. They must reside in a `__mocks__` folder next to mocked module.
 3. Npm and local modules can both be mocked.
+
+**Mocking user modules**
+
+Manual mocks are defined by writing a module in a `__mocks__/` subdirectory immediately adjacent to the module. For example, to mock a module called user in the models directory, create a file called `user.js` and put it in the `models/__mocks__` directory. Note that the `__mocks__` folder is `case-sensitive`, so naming the directory `__MOCKS__` will break on some systems.
+
+**Note** : When we require that module in our tests, then explicitly calling jest.mock('./moduleName') is required.
+
+**Mocking Node modules**
+
+1. Scoped modules can be mocked by creating a file in a directory structure that matches the name of the scoped module. For example, to mock a scoped module called `@scope/project-name`, create a file at `__mocks__/@scope/project-name.js`, creating the `@scope/` directory accordingly.
+2. Please refer to [this](https://jestjs.io/docs/en/manual-mocks) link for further details of mock testing.
+
+**Note** : If we want to mock Node's core modules (e.g.: fs or path), then explicitly calling e.g. jest.mock('path') is required, because core Node modules are not mocked by default.
  
 ### Mock Demo
 
 1. Create a file `fetch-question-sage.spec.js` alogside `fetch-question-sage.js`. To invoke this test file we would use `jest saga`. Here saga is the rejex we are using since this is the only test file whose name has saga in it.
-2. Add the below code in this file :
+2. Now we need to create the mock for `isomorphic-fetch`. This is done by creating a file with the same name ie `isomorphic-fetch.js` in a folder named `__mocks__` at the same level as the `node_modules`. Add the below code to the mock file :
+    ```javascript
+    let __value = 42;
+    const isomorphicFetch = jest.fn(() => new Promise(resolve=> resolve(__value))); // This is a spy function which return a promise. This is called when you call fetch()
+    isomorphicFetch.__setValue = v => __value = v;  
+    export default isomorphicFetch;
+    ```
+3. Now we update the test file created by us ie `fetch-question-sage.spec.js` with the below code :
     ```javascript
     import { handleFetchQuestion } from './fetch-question-saga'; // api to fetch the questions
     import fetch from 'isomorphic-fetch' // spy function to mock isomorphic-fetch npm module
@@ -381,17 +401,29 @@ A mock is a convincing duplicate without any internal workings. They can be crea
         })
     });
     ```
-3. Now we need to create the mock for `isomorphic-fetch`. This is done by creating a file with the same name ie `isomorphic-fetch.js` in a folder named `__mocks__` at the same level as the node_modules. Add the below code to the mock file :
-    ```javascript
-    let __value = 42;
-    const isomorphicFetch = jest.fn(() => new Promise(resolve=> resolve(__value))); // This is a spy function which return a promise. This is called when you call fetch()
-    isomorphicFetch.__setValue = v => __value = v;  
-    export default isomorphicFetch;
-    ```
+    1. jest will automatically pick the mock `isomorphic-fetch` instead of the npm `isomorphic-fetch`. This will not happend for a local mock file.
+    2. To test the fetch spy we pass it to the expect api and use `toHaveBeenCalledWith` to check the arguments passed to it.
+    3. The `handleFetchQuestion` return genetator which we iterate on.
 
 
+### Manual vs Automatic Mocking
 
+1. In some setups, any require statements will have mocks generated automatically.
+2. If a manual mock exists, it will be used as the mock instead of the automatic version.
+3. Generally all apps have a combination of automatic and manual mocking.
 
+**Manual Mock**
+1. They exist as separate files alongside the file being mocked.
+2. Used automatically for npm modules.
+3. Need to be upgraded when mock files change. Eg if the version of a npm module has some significant/breaking changes in them.
+
+**Automatic Mock**
+1. Mock can be created using `.genMockFromModules` jest function. Mocks are generally created correctly but sometimes not.
+2. The developer doesn't need to be bothered about the npm module version change.
+3. Chalenges :
+    1. Complex values can't be mocked using automatic mocking.
+    2. Methods which are not part of the module at compile time will not be mocked.
+    3. Modules that you don't expect to be mocked may be mocked.
 
 ## Snapshot Testing
 
