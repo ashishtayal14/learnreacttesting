@@ -427,6 +427,8 @@ Manual mocks are defined by writing a module in a `__mocks__/` subdirectory imme
 
 ## Snapshot Testing
 
+
+
 ## Testing Components
 
 ## Advanced Jest Matchers
